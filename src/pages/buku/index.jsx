@@ -9,6 +9,10 @@ const BookIndex = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isId, setIsId] = useState(null);
   const [modalMode, setModalMode] = useState("tambah");
+  const [search, setSearch] = useState("");
+const filteredBooks = books.filter((item) =>
+  item.judul.toLowerCase().includes(search.toLowerCase())
+);
 
   const Navigate = useNavigate();
 
@@ -180,6 +184,15 @@ const BookIndex = () => {
               Tambah Buku
             </button>
           </div>
+          <div className="mb-4 flex justify-end">
+  <input
+    type="text"
+    placeholder="Cari judul buku..."
+    className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+  />
+</div>
           <div className="relative w-full overflow-auto">
             <table className="w-full caption-bottom text-sm">
               <thead className="[&_tr]:border-b">
@@ -195,9 +208,9 @@ const BookIndex = () => {
                 </tr>
               </thead>
               <tbody className="[&_tr:last-child]:border-0">
-                {books && books.length > 0 ? (
-                  books.map((item, index) => (
-                    <tr
+  {filteredBooks && filteredBooks.length > 0 ? (
+    filteredBooks.map((item, index) => (
+                          <tr
                       key={index}
                       className="border-b border-gray-200 dark:border-gray-800 transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-800/50"
                     >
@@ -240,8 +253,8 @@ const BookIndex = () => {
                         </div>
                       </td>
                     </tr>
-                  ))
-                ) : (
+    ))
+  ) : (
                   <tr>
                     <td colSpan={8} className="p-4 text-center text-gray-500 dark:text-gray-400">
                       Data Kosong

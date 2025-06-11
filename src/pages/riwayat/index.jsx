@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import API from "../../lib/axios";
-import Modal from "../components/Modal";
-import { toast } from "react-toastify";
+import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom';
+import API from '../../lib/axios';
+// import toast from 'daisyui/components/toast';
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { toast } from 'react-toastify';
+import Modal from '../components/Modal';
 
-const MinjamIndex = () => {
+const RiwayatIndex = () => {
   const [peminjaman, setPeminjaman] = useState([]);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -335,28 +336,20 @@ const MinjamIndex = () => {
       });
   }
 
-  function exportExcel() {
-    const formatedData = peminjaman.map((item, index) => ({
-      No: index + 1,
-      Buku: item.id_buku,
-      Member: item.id_member,
-      Tanggal_Peminjaman: item.tgl_pinjam,
-      Tanggal_Pengembalian: item.tgl_pengembalian || "-",
-      Status_Pengembalian: item.status_pengembalian === 1 ? "Sudah" : "Belum",
-    }));
+ const statistik = {};
 
-    const worksheet = XLSX.utils.json_to_sheet(formatedData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet 1");
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
-    const file = new Blob([excelBuffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    saveAs(file, "data_peminjaman.xlsx");
+peminjaman.forEach(item => {
+  if (!statistik[item.id_buku]) {
+    statistik[item.id_buku] = { minjem: 0, rusak: 0 };
   }
+
+  if (item.status_pengembalian === 1) {
+    statistik[item.id_buku].minjem++;
+  } else if (item.status_pengembalian === 0) {
+    statistik[item.id_buku].rusak++;
+  }
+});
+
 
   const generatePDF = (data) => {
     const doc = new jsPDF();
@@ -370,8 +363,9 @@ const MinjamIndex = () => {
     doc.setFontSize(12);
     doc.text(`ID Member: ${data.id_member}`, 14, 30);
     doc.text(`ID Buku: ${data.id_buku}`, 14, 36);
-    doc.text(`Tanggal Pinjam: ${data.tgl_pinjam}`, 14, 42);
-    doc.text(`Tanggal Pengembalian: ${data.tgl_pengembalian || "-"}`, 14, 48);
+    doc.text(`Minjem Berapa kali: ${statistik[data.id_buku].minjem}`, 14, 42);
+    doc.text(`Rusak Berapa kali: ${statistik[data.id_buku].rusak}`, 14, 48);
+    // doc.text(`Tanggal Pengembalian: ${data.tgl_pengembalian || "-"}`, 14, 48);
     doc.text(
       `Status Pengembalian: ${
         data.status_pengembalian === 1 ? "Sudah" : "Belum"
@@ -387,76 +381,47 @@ const MinjamIndex = () => {
     <div>
       <>
         <div className="bg-base-200 p-4 rounded-box shadow-sm">
-          <h2 className="text-2xl font-bold mb-2">Daftar Peminjaman</h2>
+          <h2 className="text-2xl font-bold mb-2">Daftar Riwayat</h2>
           <p className="mb-4 text-sm text-gray-500">
-            Data Peminjaman yang terdaftar dalam sistem.
+            Data Riwayat yang terdaftar dalam sistem.
           </p>
-          <button
-            className="btn btn-success"
-            onClick={() => {
-              handleModal("tambah");
-            }}
-          >
-            + Add
-          </button>
-          <button className="btn btn-primary" onClick={exportExcel}>
-            Eksport to excel
-          </button>
           <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-200 shadow-sm">
             <table className="table">
               {/* head */}
               <thead>
                 <tr>
                   <th></th>
-                  <th>buku</th>
-                  <th>member</th>
-                  <th>tanggal peminjaman</th>
+                  <th>Memeber</th>
+                  <th>Berapa kali minjem</th>
+                  <th>berapa kali rusak</th>
                   <th>pengembalian</th>
                   <th>status</th>
                   <th>action</th>
                 </tr>
               </thead>
               <tbody>
+
                 {peminjaman && peminjaman.length > 0 ? (
                   peminjaman.map((item, index) => (
+
+                
                     <tr key={index}>
                       <th>{index + 1}</th>
-                      <td>{item.id_buku}</td>
+                      {/* <td>{item.id_buku}</td> */}
                       <td>{item.id_member}</td>
-                      <td>{item.tgl_pinjam}</td>
-                      <td>{item.tgl_pengembalian || "-"}</td>
+                      <td>{statistik[item.id_buku].minjem}</td>
+                      <td>{statistik[item.id_buku].rusak}</td>
                       <td>
                         {item.status_pengembalian === 1 ? "sudah" : "belum"}
                       </td>
                       <td>
+        
                         <button
-                          className="btn btn-outline me-2"
-                          onClick={() => {
-                            // Debug: tampilkan ID yang dikirim ke handleModal
-                            console.log("ID yang dikirim ke detail:", item.id);
-                            handleModal("detail", item.id);
-                          }}
-                        >
-                          detail
-                        </button>
-                        {item.status_pengembalian === 0 ? (
-                          <button
-                            className="btn btn-outline me-2"
-                            onClick={() => {
-                              handleModal("pengembalian", item.id);
-                            }}
-                          >
-                            kembalikan buku
-                          </button>
-                        ) : (
-                          ""
-                        )}
-                        {/* <button
                           className="btn btn-outline btn-sm"
                           onClick={() => generatePDF(item)}
                         >
                           Download PDF
-                        </button> */}
+                        </button>
                       </td>
                     </tr>
                   ))
@@ -639,4 +604,4 @@ const MinjamIndex = () => {
   );
 };
 
-export default MinjamIndex;
+export default RiwayatIndex

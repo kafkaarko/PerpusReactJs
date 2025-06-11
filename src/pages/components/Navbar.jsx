@@ -47,6 +47,9 @@ const Navbar = () => {
               <Link to="/grafikIndex">Grafik</Link>
             </li>
             <li>
+              <Link to="/riwayatIndex">riwayat</Link>
+            </li>
+            <li>
               <button onClick={logoutHandler}>Logout</button>
             </li>
           </ul>

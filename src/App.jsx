@@ -9,6 +9,7 @@ import MinjamIndex from './pages/peminjaman'
 import DendaIndex from './pages/denda'
 import GrafikIndex from './pages/grafik'
 import IsLogin from './pages/middleware/isLogin'
+import RiwayatIndex from './pages/riwayat'
 
 
 
@@ -31,6 +32,7 @@ function App() {
         <Route path='minjamIndex' element={<MinjamIndex/>}/>
         <Route path='dendaIndex' element={<DendaIndex/>}/>
         <Route path='grafikIndex' element={<GrafikIndex/>}/>
+        <Route path='riwayatIndex' element={<RiwayatIndex/>}/>
         </Route>
       </Routes>
 

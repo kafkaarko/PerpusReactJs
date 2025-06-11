@@ -12,6 +12,7 @@ const MemberIndex = () => {
 
   const Navigate = useNavigate();
 
+  // if(formModal.no_ktp === length 12) 
   const [formModal, setFormModal] = useState({
     no_ktp: "",
     nama: "",
